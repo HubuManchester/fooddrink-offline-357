@@ -17,12 +17,14 @@
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Accessibility settings"
+                    <Label x:Name="PageTitleLabel" 
+                           Text="Accessibility settings"
                            FontSize="28"
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
                            SemanticProperties.HeadingLevel="Level1" />
-                    <Label Text="Large text takes effect immediately and remains active when switching pages."
+                    <Label x:Name="PageDescLabel" 
+                           Text="Large text takes effect immediately and remains active when switching pages."
                            FontSize="15"
                            TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
                 </VerticalStackLayout>
@@ -35,9 +37,36 @@
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="8" />
                 </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+                    <Label x:Name="LanguageSectionLabel" 
+                           Text="Language Preferences" 
+                           FontSize="17" 
+                           FontAttributes="Bold" 
+                           TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}" />
+
+                    <Picker x:Name="LanguagePicker"
+                            Title="Select Language"
+                            SelectedIndexChanged="OnLanguageChanged"
+                            SemanticProperties.Hint="Choose application language">
+                        <Picker.Items>
+                            <x:String>English</x:String>
+                            <x:String>中文 (Chinese)</x:String>
+                        </Picker.Items>
+                    </Picker>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="16">
                     <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
-                        <Label Text="Theme mode"
+                        <Label x:Name="ThemeSectionLabel" 
+                               Text="Theme mode"
                                FontSize="17"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
@@ -58,11 +87,13 @@
 
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14">
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Large text mode"
+                            <Label x:Name="FontSectionLabel" 
+                                   Text="Large text mode"
                                    FontSize="17"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}" />
-                            <Label Text="Increase text size for accessibility demonstration."
+                            <Label x:Name="FontDescLabel" 
+                                   Text="Increase text size for accessibility demonstration."
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
                         </VerticalStackLayout>
