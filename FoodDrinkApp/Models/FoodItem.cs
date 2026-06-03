@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using FoodDrinkApp.Services; // 引入 LanguageService
 
 namespace FoodDrinkApp.Models;
 
@@ -34,12 +35,21 @@ public sealed class FoodItem
     [JsonPropertyName("tags")]
     public string Tags { get; set; } = string.Empty;
 
-    [JsonIgnore]
-    public string CaloriesLabel => $"{Calories} kcal";
+    // 新增：图片路径属性
+    [JsonPropertyName("imageUrl")]
+    public string ImageUrl { get; set; } = string.Empty;
 
     [JsonIgnore]
-    public string MacroSummary => $"Protein {Protein}g, carbs {Carbs}g, fat {Fat}g";
+    public string CaloriesLabel => LanguageService.CurrentLanguage == "zh"
+        ? $"{Calories} 千卡"
+        : $"{Calories} kcal";
+
+    // 更新：支持双语的营养素总结
+    [JsonIgnore]
+    public string MacroSummary => LanguageService.CurrentLanguage == "zh"
+        ? $"蛋白质 {Protein}g, 碳水 {Carbs}g, 脂肪 {Fat}g"
+        : $"Protein {Protein}g, carbs {Carbs}g, fat {Fat}g";
 
     [JsonIgnore]
-    public string AccessibleSummary => $"{Name}. {Category}. {Calories} kcal. {MacroSummary}. {AllergyNote}";
+    public string AccessibleSummary => $"{Name}. {Category}. {CaloriesLabel}. {MacroSummary}. {AllergyNote}";
 }
