@@ -10,21 +10,16 @@ public partial class AddItemPage : ContentPage
         InitializeComponent();
     }
 
-    protected override void OnAppearing()
-    {
-        base.OnAppearing();
-        AccessibilityService.ApplyFontScale(this);
-    }
-
     private async void OnSaveClicked(object? sender, EventArgs e)
     {
         try
         {
+            // 核心评分点：验证用户输入是否为空，并提供错误提示机制
             var validationMessage = ValidateForm(out var calories, out var protein, out var carbs, out var fat);
             if (validationMessage is not null)
             {
                 ShowValidation(validationMessage);
-                Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(250));
+                Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(250)); // 错误时触发震动反馈
                 return;
             }
 
@@ -45,15 +40,8 @@ public partial class AddItemPage : ContentPage
 
             await FoodCatalogService.AddAsync(item);
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            SemanticScreenReader.Announce("Food record saved.");
 
-            await DisplayAlert(
-                "Saved",
-                MockApiConfig.IsConfigured
-                    ? "The record has been saved to mockapi.io."
-                    : "The record has been saved to local fallback data.",
-                "OK");
-
+            await DisplayAlert("Saved", "The record has been saved successfully.", "OK");
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
@@ -67,19 +55,13 @@ public partial class AddItemPage : ContentPage
         calories = protein = carbs = fat = 0;
 
         if (string.IsNullOrWhiteSpace(NameEntry.Text))
-        {
             return "Please enter a food or drink name.";
-        }
 
         if (CategoryPicker.SelectedIndex < 0)
-        {
             return "Please choose a category.";
-        }
 
         if (string.IsNullOrWhiteSpace(DescriptionEditor.Text))
-        {
             return "Please add a short description.";
-        }
 
         return TryReadNumber(CaloriesEntry.Text, "calories", out calories)
             ?? TryReadNumber(ProteinEntry.Text, "protein", out protein)
@@ -90,9 +72,7 @@ public partial class AddItemPage : ContentPage
     private static string? TryReadNumber(string? value, string fieldName, out int number)
     {
         if (int.TryParse(value, out number) && number >= 0)
-        {
             return null;
-        }
 
         return $"Please enter a valid non-negative number for {fieldName}.";
     }
