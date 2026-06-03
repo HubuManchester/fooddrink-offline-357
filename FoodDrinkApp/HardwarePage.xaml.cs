@@ -5,6 +5,7 @@ namespace FoodDrinkApp;
 public partial class HardwarePage : ContentPage
 {
     private int feedbackTestCount;
+    private bool IsZh => LanguageService.CurrentLanguage == "zh";
 
     public HardwarePage()
     {
@@ -15,6 +16,35 @@ public partial class HardwarePage : ContentPage
     {
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
+        UpdateLanguageTexts();
+    }
+
+    private void UpdateLanguageTexts()
+    {
+        Title = LanguageService.Get("HardwareTitle");
+        HardwareTitleLabel.Text = LanguageService.Get("HardwareTitle");
+        HardwareDescLabel.Text = LanguageService.Get("HardwareDesc");
+
+        FoodPhotoTitleLabel.Text = LanguageService.Get("FoodPhotoTitle");
+        FoodPhotoDescLabel.Text = LanguageService.Get("FoodPhotoDesc");
+        TakePhotoButton.Text = LanguageService.Get("PhotoBtn");
+
+        MealLocationTitleLabel.Text = LanguageService.Get("MealLocationTitle");
+        MealLocationDescLabel.Text = LanguageService.Get("MealLocationDesc");
+        LocateButton.Text = LanguageService.Get("LocateBtn");
+
+        if (LocationLabel.Text.Contains("captured") || LocationLabel.Text.Contains("尚未"))
+            LocationLabel.Text = LanguageService.Get("LocationDefault");
+
+        if (CoordinateLabel.Text.Contains("appear") || CoordinateLabel.Text.Contains("坐标将"))
+            CoordinateLabel.Text = LanguageService.Get("CoordinateDefault");
+
+        ReadHelpButton.Text = LanguageService.Get("ReadHelpBtn");
+        StopSpeechButton.Text = LanguageService.Get("StopSpeechBtn");
+        HapticButton.Text = LanguageService.Get("HapticBtn");
+
+        HardwareStatusLabel.Text = IsZh ? "准备就绪。" : "Ready.";
+        FeedbackCountLabel.Text = IsZh ? $"触觉反馈测试次数：{feedbackTestCount}" : $"Haptic feedback tests: {feedbackTestCount}";
     }
 
     protected override void OnDisappearing()
@@ -23,52 +53,67 @@ public partial class HardwarePage : ContentPage
         base.OnDisappearing();
     }
 
-    // 1. 硬件功能：相机 (Camera)
     private async void OnTakePhotoClicked(object? sender, EventArgs e)
     {
         try
         {
             if (!MediaPicker.Default.IsCaptureSupported)
             {
-                SetStatus("This device does not support camera capture.");
+                SetStatus(IsZh ? "该设备不支持相机功能。" : "This device does not support camera capture.");
                 return;
             }
 
             var photo = await MediaPicker.Default.CapturePhotoAsync();
-            if (photo is null) return;
+            if (photo is null)
+            {
+                SetStatus(IsZh ? "已取消拍摄。" : "Photo capture cancelled.");
+                return;
+            }
 
             await using var stream = await photo.OpenReadAsync();
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
             var imageBytes = memoryStream.ToArray();
             FoodPhoto.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
-            SetStatus("Food photo captured successfully.");
+
+            SetStatus(IsZh ? "食品照片拍摄成功。" : "Food photo captured successfully.");
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+        }
+        catch (PermissionException)
+        {
+            SetStatus(IsZh ? "相机权限被拒绝。" : "Camera permission was denied.");
         }
         catch (Exception ex)
         {
-            SetStatus($"Camera error: {ex.Message}");
+            SetStatus(IsZh ? $"相机错误: {ex.Message}" : $"Camera error: {ex.Message}");
         }
     }
 
-    // 2. 硬件功能：定位与地理编码 (Location & Geocoding)
     private async void OnGetLocationClicked(object? sender, EventArgs e)
     {
         try
         {
-            SetStatus("Getting location...");
+            SetStatus(IsZh ? "正在获取定位..." : "Getting location...");
             var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
             var location = await Geolocation.Default.GetLocationAsync(request);
 
-            if (location is null) return;
+            if (location is null)
+            {
+                SetStatus(IsZh ? "无法获取当前位置。" : "Current location could not be found.");
+                return;
+            }
 
-            CoordinateLabel.Text = $"Latitude {location.Latitude:F5}, longitude {location.Longitude:F5}";
+            CoordinateLabel.Text = IsZh ? $"纬度 {location.Latitude:F5}, 经度 {location.Longitude:F5}" : $"Latitude {location.Latitude:F5}, longitude {location.Longitude:F5}";
             LocationLabel.Text = await BuildAddressTextAsync(location);
-            SetStatus("Country, city, and coordinates have been loaded.");
+            SetStatus(IsZh ? "国家、城市和坐标已加载。" : "Country, city, and coordinates have been loaded.");
+        }
+        catch (PermissionException)
+        {
+            SetStatus(IsZh ? "定位权限被拒绝。" : "Location permission was denied.");
         }
         catch (Exception ex)
         {
-            SetStatus($"Location error: {ex.Message}");
+            SetStatus(IsZh ? $"定位错误: {ex.Message}" : $"Location error: {ex.Message}");
         }
     }
 
@@ -79,36 +124,35 @@ public partial class HardwarePage : ContentPage
             var placemarks = await Geocoding.Default.GetPlacemarksAsync(location);
             var placemark = placemarks?.FirstOrDefault();
             if (placemark != null)
-            {
                 return $"{placemark.CountryName} / {placemark.AdminArea} / {placemark.Locality}";
-            }
         }
         catch { }
-        return "Coordinates found, but address resolution failed.";
+        return LanguageService.CurrentLanguage == "zh" ? "已找到坐标，但地址解析失败。" : "Coordinates found, but address resolution failed.";
     }
 
-    // 3. 硬件功能：文字转语音 (Text-to-Speech)
     private async void OnReadHelpClicked(object? sender, EventArgs e)
     {
         try
         {
-            const string helpText = "NutriBite records foods and drinks, shows nutrition details, and uses camera, location, speech, and haptic feedback to make meal tracking more practical.";
+            string helpText = IsZh
+                ? "食光营养助手可记录餐饮、展示营养细节，并利用相机、定位、语音与触觉反馈提升记录体验。"
+                : "NutriBite records foods and drinks, shows nutrition details, and uses camera, location, speech, and haptic feedback to make meal tracking more practical.";
+
             await SpeechService.SpeakAsync(helpText);
-            SetStatus("Reading help content aloud.");
+            SetStatus(IsZh ? "正在朗读帮助内容。" : "Reading help content aloud.");
         }
         catch (Exception ex)
         {
-            SetStatus($"Text to speech error: {ex.Message}");
+            SetStatus(IsZh ? $"语音错误: {ex.Message}" : $"Text to speech error: {ex.Message}");
         }
     }
 
     private void OnStopSpeechClicked(object? sender, EventArgs e)
     {
         SpeechService.Stop();
-        SetStatus("Reading stopped.");
+        SetStatus(IsZh ? "已停止朗读。" : "Reading stopped.");
     }
 
-    // 4. 硬件功能：震动与触觉反馈 (Vibration & Haptic Feedback)
     private void OnFeedbackClicked(object? sender, EventArgs e)
     {
         try
@@ -116,12 +160,12 @@ public partial class HardwarePage : ContentPage
             Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(450));
             HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
             feedbackTestCount++;
-            FeedbackCountLabel.Text = $"Haptic feedback tests: {feedbackTestCount}";
-            SetStatus("Vibration and haptic feedback triggered.");
+            FeedbackCountLabel.Text = IsZh ? $"触觉反馈测试次数：{feedbackTestCount}" : $"Haptic feedback tests: {feedbackTestCount}";
+            SetStatus(IsZh ? "触发震动与触觉反馈。" : "Vibration and haptic feedback triggered.");
         }
         catch (Exception ex)
         {
-            SetStatus($"Feedback error: {ex.Message}");
+            SetStatus(IsZh ? $"反馈错误: {ex.Message}" : $"Feedback error: {ex.Message}");
         }
     }
 
