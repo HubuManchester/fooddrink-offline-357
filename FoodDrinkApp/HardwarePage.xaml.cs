@@ -23,6 +23,7 @@ public partial class HardwarePage : ContentPage
         base.OnDisappearing();
     }
 
+    // 1. 硬件功能：相机 (Camera)
     private async void OnTakePhotoClicked(object? sender, EventArgs e)
     {
         try
@@ -34,11 +35,7 @@ public partial class HardwarePage : ContentPage
             }
 
             var photo = await MediaPicker.Default.CapturePhotoAsync();
-            if (photo is null)
-            {
-                SetStatus("Photo capture cancelled.");
-                return;
-            }
+            if (photo is null) return;
 
             await using var stream = await photo.OpenReadAsync();
             using var memoryStream = new MemoryStream();
@@ -48,16 +45,13 @@ public partial class HardwarePage : ContentPage
             SetStatus("Food photo captured successfully.");
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
         }
-        catch (PermissionException)
-        {
-            SetStatus("Camera permission was denied. Enable camera access in device settings.");
-        }
         catch (Exception ex)
         {
             SetStatus($"Camera error: {ex.Message}");
         }
     }
 
+    // 2. 硬件功能：定位与地理编码 (Location & Geocoding)
     private async void OnGetLocationClicked(object? sender, EventArgs e)
     {
         try
@@ -66,19 +60,11 @@ public partial class HardwarePage : ContentPage
             var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(10));
             var location = await Geolocation.Default.GetLocationAsync(request);
 
-            if (location is null)
-            {
-                SetStatus("Current location could not be found.");
-                return;
-            }
+            if (location is null) return;
 
             CoordinateLabel.Text = $"Latitude {location.Latitude:F5}, longitude {location.Longitude:F5}";
             LocationLabel.Text = await BuildAddressTextAsync(location);
             SetStatus("Country, city, and coordinates have been loaded.");
-        }
-        catch (PermissionException)
-        {
-            SetStatus("Location permission was denied. Enable location access in device settings.");
         }
         catch (Exception ex)
         {
@@ -92,68 +78,16 @@ public partial class HardwarePage : ContentPage
         {
             var placemarks = await Geocoding.Default.GetPlacemarksAsync(location);
             var placemark = placemarks?.FirstOrDefault();
-            var address = FormatPlacemark(placemark);
-
-            if (!string.IsNullOrWhiteSpace(address))
+            if (placemark != null)
             {
-                return address;
+                return $"{placemark.CountryName} / {placemark.AdminArea} / {placemark.Locality}";
             }
         }
-        catch
-        {
-        }
-
-        return BuildFallbackAddress(location);
+        catch { }
+        return "Coordinates found, but address resolution failed.";
     }
 
-    private static string FormatPlacemark(Placemark? placemark)
-    {
-        if (placemark is null)
-        {
-            return string.Empty;
-        }
-
-        var parts = new[]
-        {
-            placemark.CountryName,
-            placemark.AdminArea,
-            placemark.Locality,
-            placemark.SubLocality,
-            placemark.Thoroughfare
-        }
-        .Where(part => !string.IsNullOrWhiteSpace(part))
-        .Distinct()
-        .ToArray();
-
-        return parts.Length == 0 ? string.Empty : string.Join(" / ", parts);
-    }
-
-    private static string BuildFallbackAddress(Location location)
-    {
-        if (IsNear(location, 37.422, -122.084, 0.08))
-        {
-            return "United States / California / Mountain View";
-        }
-
-        if (location.Latitude is >= 37.0 and <= 38.2 && location.Longitude is >= -123.2 and <= -121.5)
-        {
-            return "United States / California / San Francisco Bay Area";
-        }
-
-        if (location.Latitude is >= 18 and <= 54 && location.Longitude is >= 73 and <= 135)
-        {
-            return "China / Current city requires a real device or available geocoding service";
-        }
-
-        return "Coordinates were found, but country and city were not returned by this device.";
-    }
-
-    private static bool IsNear(Location location, double latitude, double longitude, double tolerance)
-    {
-        return Math.Abs(location.Latitude - latitude) <= tolerance &&
-               Math.Abs(location.Longitude - longitude) <= tolerance;
-    }
-
+    // 3. 硬件功能：文字转语音 (Text-to-Speech)
     private async void OnReadHelpClicked(object? sender, EventArgs e)
     {
         try
@@ -174,6 +108,7 @@ public partial class HardwarePage : ContentPage
         SetStatus("Reading stopped.");
     }
 
+    // 4. 硬件功能：震动与触觉反馈 (Vibration & Haptic Feedback)
     private void OnFeedbackClicked(object? sender, EventArgs e)
     {
         try
@@ -182,7 +117,7 @@ public partial class HardwarePage : ContentPage
             HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
             feedbackTestCount++;
             FeedbackCountLabel.Text = $"Haptic feedback tests: {feedbackTestCount}";
-            SetStatus("Vibration and haptic feedback triggered. The changing counter can be used for screen-recorded verification.");
+            SetStatus("Vibration and haptic feedback triggered.");
         }
         catch (Exception ex)
         {
