@@ -63,6 +63,22 @@ public partial class HardwarePage : ContentPage
                 return;
             }
 
+            // 【核心修复】：显式检查并请求相机权限
+            // 这样系统会先等待您点击“允许”，确认拿到权限后，再继续执行下面的真实拍照代码，就不会被打断了。
+            var cameraStatus = await Permissions.CheckStatusAsync<Permissions.Camera>();
+            if (cameraStatus != PermissionStatus.Granted)
+            {
+                cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
+                if (cameraStatus != PermissionStatus.Granted)
+                {
+                    SetStatus(IsZh ? "相机权限被拒绝，无法拍照。" : "Camera permission was denied.");
+                    return;
+                }
+            }
+
+            SetStatus(IsZh ? "正在唤起相机..." : "Opening camera...");
+
+            // 权限验证通过后，真实唤起原生相机应用
             var photo = await MediaPicker.Default.CapturePhotoAsync();
             if (photo is null)
             {
@@ -74,14 +90,12 @@ public partial class HardwarePage : ContentPage
             using var memoryStream = new MemoryStream();
             await stream.CopyToAsync(memoryStream);
             var imageBytes = memoryStream.ToArray();
+
+            // 将真实拍摄的照片渲染到界面上
             FoodPhoto.Source = ImageSource.FromStream(() => new MemoryStream(imageBytes));
 
             SetStatus(IsZh ? "食品照片拍摄成功。" : "Food photo captured successfully.");
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-        }
-        catch (PermissionException)
-        {
-            SetStatus(IsZh ? "相机权限被拒绝。" : "Camera permission was denied.");
         }
         catch (Exception ex)
         {
@@ -157,11 +171,12 @@ public partial class HardwarePage : ContentPage
     {
         try
         {
-            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(450));
+            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
             HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
+
             feedbackTestCount++;
             FeedbackCountLabel.Text = IsZh ? $"触觉反馈测试次数：{feedbackTestCount}" : $"Haptic feedback tests: {feedbackTestCount}";
-            SetStatus(IsZh ? "触发震动与触觉反馈。" : "Vibration and haptic feedback triggered.");
+            SetStatus(IsZh ? "触发震动与触觉反馈。" : "Half-second vibration and haptic feedback triggered.");
         }
         catch (Exception ex)
         {
