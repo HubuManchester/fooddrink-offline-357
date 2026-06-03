@@ -30,17 +30,8 @@
                     <Shadow Brush="#33000000" Offset="0,8" Radius="18" Opacity="0.45" />
                 </Border.Shadow>
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10">
-                    <Label x:Name="PageTitleLabel"
-                           Text="NutriBite"
-                           FontSize="31"
-                           FontAttributes="Bold"
-                           TextColor="#FFFFFF"
-                           SemanticProperties.HeadingLevel="Level1" />
-                    <Label x:Name="PageDescLabel" 
-                           Grid.Row="1"
-                           Text="Track nutrition, flavour, photos, and meal context in one place."
-                           FontSize="15"
-                           TextColor="#FFF5E8" />
+                    <Label x:Name="PageTitleLabel" Text="NutriBite" FontSize="31" FontAttributes="Bold" TextColor="#FFFFFF" SemanticProperties.HeadingLevel="Level1" />
+                    <Label x:Name="PageDescLabel" Grid.Row="1" Text="Track nutrition, flavour, photos, and meal context in one place." FontSize="15" TextColor="#FFF5E8" />
                     <Grid Grid.Row="2" ColumnDefinitions="*,*,*" ColumnSpacing="8" Margin="0,3,0,0">
                         <Border BackgroundColor="#33FFFFFF" StrokeThickness="0" Padding="10,7">
                             <Border.StrokeShape>
@@ -66,23 +57,9 @@
                             <Border.StrokeShape>
                                 <RoundRectangle CornerRadius="8" />
                             </Border.StrokeShape>
-                            <SearchBar x:Name="SearchFoodBar"
-                                       Placeholder="Search foods, drinks, categories, or tags"
-                                       TextChanged="OnSearchTextChanged"
-                                       SearchButtonPressed="OnSearchButtonPressed"
-                                       TextColor="#3A2518"
-                                       PlaceholderColor="#9A7B63"
-                                       BackgroundColor="Transparent"
-                                       SemanticProperties.Hint="Search the food and drink list" />
+                            <SearchBar x:Name="SearchFoodBar" Placeholder="Search foods, drinks, categories, or tags" TextChanged="OnSearchTextChanged" SearchButtonPressed="OnSearchButtonPressed" TextColor="#3A2518" PlaceholderColor="#9A7B63" BackgroundColor="Transparent" SemanticProperties.Hint="Search the food and drink list" />
                         </Border>
-                        <Button x:Name="AddRecordButton"
-                                Grid.Column="1"
-                                Text="Add"
-                                BackgroundColor="#2F7A4F"
-                                TextColor="#FFFFFF"
-                                FontAttributes="Bold"
-                                Clicked="OnAddClicked"
-                                SemanticProperties.Hint="Add a new food or drink record" />
+                        <Button x:Name="AddRecordButton" Grid.Column="1" Text="Add" BackgroundColor="#2F7A4F" TextColor="#FFFFFF" FontAttributes="Bold" Clicked="OnAddClicked" SemanticProperties.Hint="Add a new food or drink record" />
                     </Grid>
                 </Grid>
             </Border>
@@ -100,44 +77,44 @@
                                 <Shadow Brush="#22000000" Offset="0,5" Radius="14" Opacity="0.34" />
                             </Border.Shadow>
 
-                            <!-- 调整列定义：左侧分配给图片，右侧分配给文字信息 -->
-                            <Grid ColumnDefinitions="110,*">
+                            <Grid ColumnDefinitions="Auto,*">
 
-                                <!-- 引入图片并设置圆角裁剪 (左侧上下两角设为8，匹配Border) -->
-                                <Image Source="{Binding ImageUrl}" 
-               Aspect="AspectFill" 
-               SemanticProperties.Description="{Binding Name}">
-                                    <Image.Clip>
-                                        <RoundRectangleGeometry CornerRadius="8,0,8,0" />
-                                    </Image.Clip>
-                                </Image>
+                                <Border Grid.Column="0"
+                                        WidthRequest="100"
+                                        HeightRequest="100"
+                                        Margin="16,16,0,16"
+                                        VerticalOptions="Center"
+                                        StrokeThickness="0"
+                                        BackgroundColor="Transparent">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="8" />
+                                    </Border.StrokeShape>
+                                    <Image Source="{Binding ImageUrl}" 
+                                           Aspect="AspectFill" 
+                                           SemanticProperties.Description="{Binding Name}" />
+                                </Border>
 
-                                <!-- 右侧文本内容区 -->
-                                <Grid Grid.Column="1" Padding="16" RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8" ColumnSpacing="10">
+                                <Grid Grid.Column="1" Padding="12,16,16,16" RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8" ColumnSpacing="10">
                                     <Label Text="{Binding Name}" FontSize="20" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}" SemanticProperties.HeadingLevel="Level2" />
-
-                                    <Border Grid.Column="1" StrokeThickness="0" BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}" Padding="10,5">
+                                    <Border Grid.Column="1" StrokeThickness="0" BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}" Padding="10,5" VerticalOptions="Start">
                                         <Border.StrokeShape>
                                             <RoundRectangle CornerRadius="8" />
                                         </Border.StrokeShape>
                                         <Label Text="{Binding CaloriesLabel}" FontSize="13" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
                                     </Border>
-
                                     <Label Grid.Row="1" Grid.ColumnSpan="2" Text="{Binding Description}" FontSize="14" TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" LineBreakMode="TailTruncation" />
-
                                     <Label Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding MacroSummary}" FontSize="13" TextColor="{AppThemeBinding Light=#2F7A4F, Dark=#8CE6A1}" />
-
                                     <Grid Grid.Row="3" Grid.ColumnSpan="2" ColumnDefinitions="*,Auto" Margin="0,4,0,0">
                                         <Label Text="{Binding Category}" FontSize="13" FontAttributes="Bold" TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" VerticalOptions="Center"/>
 
                                         <Button Grid.Column="1"
-                        Text="{Binding Path=BindingContext.DetailsButtonText, Source={x:Reference MainPageRoot}}"
-                        Padding="14,8"
-                        BackgroundColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
-                        TextColor="{AppThemeBinding Light=#FFFFFF, Dark=#261307}"
-                        CommandParameter="{Binding Id}"
-                        Clicked="OnDetailsClicked"
-                        SemanticProperties.Hint="Open nutrition details" />
+                                                Text="{Binding Path=BindingContext.DetailsButtonText, Source={x:Reference MainPageRoot}}"
+                                                Padding="14,8"
+                                                BackgroundColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
+                                                TextColor="{AppThemeBinding Light=#FFFFFF, Dark=#261307}"
+                                                CommandParameter="{Binding Id}"
+                                                Clicked="OnDetailsClicked"
+                                                SemanticProperties.Hint="Open nutrition details" />
                                     </Grid>
                                 </Grid>
                             </Grid>

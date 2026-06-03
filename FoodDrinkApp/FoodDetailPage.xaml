@@ -22,18 +22,40 @@
                         <GradientStop Color="{AppThemeBinding Light=#2F7A4F, Dark=#1D5D3A}" Offset="1.0" />
                     </LinearGradientBrush>
                 </Border.Background>
-                <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="8">
+
+                    <Border Grid.Row="0"
+                            HorizontalOptions="Start"
+                            WidthRequest="120"
+                            HeightRequest="120"
+                            Margin="0,0,0,6"
+                            StrokeThickness="2"
+                            Stroke="#44FFFFFF"
+                            BackgroundColor="Transparent">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8" />
+                        </Border.StrokeShape>
+                        <Border.Shadow>
+                            <Shadow Brush="#33000000" Offset="0,4" Radius="8" Opacity="0.3" />
+                        </Border.Shadow>
+                        <Image Source="{Binding ImageUrl}" 
+                               Aspect="AspectFill" 
+                               SemanticProperties.Description="Detailed food image" />
+                    </Border>
+
                     <Label x:Name="NameLabel"
+                           Grid.Row="1"
                            FontSize="30"
                            FontAttributes="Bold"
                            TextColor="#FFFFFF"
                            SemanticProperties.HeadingLevel="Level1" />
                     <Label x:Name="CategoryLabel"
-                           Grid.Row="1"
+                           Grid.Row="2"
                            FontSize="15"
                            TextColor="#FFF5E8" />
                     <Label x:Name="CaloriesLabel"
-                           Grid.Row="2"
+                           Grid.Row="3"
                            FontSize="24"
                            FontAttributes="Bold"
                            TextColor="#FFF0C9" />
